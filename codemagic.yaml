@@ -1,18 +1,14 @@
-# codemagic.yaml (No-Codesigning Version)
+# codemagic.yaml (Corrected Version for Unsigned/Local-Signed Build)
 
 workflows:
-  macos-build-unsigned:
-    name: macOS Build (Unsigned)
-    # 仍然建议使用 M1 Mac mini 以获得最佳性能
+  macos-build-local-sign:
+    name: macOS Build (Local Sign)
     instance_type: mac_mini_m1
     environment:
-      # 无需密钥组，因为我们不处理任何证书或私钥
       vars:
-        # Bundle ID 仍然建议保留，因为项目配置中可能需要它
-        BUNDLE_ID: "com.yourcompany.yourappname"
+        BUNDLE_ID: "com.yourcompany.yourappname" 
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-      # 依旧建议锁定依赖版本以确保构建环境稳定
       flutter: 'stable'
       xcode: 'latest'
       cocoapods: 'default'
@@ -22,15 +18,11 @@ workflows:
         script: |
           flutter pub get
 
-      - name: Flutter build for macOS (without codesigning)
+      - name: Flutter build for macOS
         script: |
-          # 核心改动：添加 --no-codesign 标志
-          # 这个标志会明确告诉 Flutter 和 Xcode 跳过所有代码签名步骤
-          flutter build macos --no-codesign --release
+          # 现在直接运行构建命令即可
+          # Xcode 会根据我们项目中的 "Sign to Run Locally" 设置来正确执行
+          flutter build macos --release
 
     artifacts:
-      # 构建产物的路径不变，我们仍然需要打包 .app 文件
       - build/macos/Build/Products/Release/*.app
-
-    # publishing:
-    #   # 由于没有签名，无法发布到任何应用商店，所以移除 publishing 模块
