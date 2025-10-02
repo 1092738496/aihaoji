@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="cn.fjdmy.uniapp.UniappProjectDataService">
+    <option name="basePath" value="$PROJECT_DIR$/build/windows/x64/runner/Debug/aihaoji.exe.WebView2/EBWebView/ZxcvbnData/3.1.0.0" />
+    <option name="generalBasePath" value="$PROJECT_DIR$/build/windows/x64/runner/Debug/aihaoji.exe.WebView2/EBWebView/ZxcvbnData/3.1.0.0" />
+    <option name="manifestPath" value="$PROJECT_DIR$/build/windows/x64/runner/Debug/aihaoji.exe.WebView2/EBWebView/ZxcvbnData/3.1.0.0/manifest.json" />
+    <option name="pagesPath" value="$PROJECT_DIR$/build/windows/x64/runner/Debug/aihaoji.exe.WebView2/EBWebView/ZxcvbnData/3.1.0.0/pages.json" />
+    <option name="scanNum" value="1" />
+    <option name="type" value="store" />
+    <option name="uniapp" value="true" />
+    <option name="uniappHx" value="true" />
+  </component>
+</project>
