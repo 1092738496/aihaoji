@@ -1,0 +1,77 @@
+# codemagic.yaml
+
+workflows:
+  macos-release-build:
+    name: macOS Release Build
+    # 选用配备 Apple 芯片的 Mac mini 作为构建服务器，性能更优
+    instance_type: mac_mini_m1 
+    # 定义环境变量，用于管理密钥和配置
+    environment:
+      groups:
+        # 1. 'apple-credentials' 是一个环境变量组，你需要在 Codemagic UI 中创建它
+        #    并存入你的 App Store Connect API Key 相关变量。
+        #    - APP_STORE_CONNECT_PRIVATE_KEY
+        #    - APP_STORE_CONNECT_KEY_IDENTIFIER
+        #    - APP_STORE_CONNECT_ISSUER_ID
+        # 2. 'certificate-credentials' 同样是一个组
+        #    - CERTIFICATE_PRIVATE_KEY (你的分发证书私钥)
+        - apple-credentials
+        - certificate-credentials
+      vars:
+        # 你的 Mac App 的 Bundle ID，必须与 Apple Developer 后台配置的 identifier 匹配
+        BUNDLE_ID: "com.yourcompany.yourappname" 
+        # Xcode 项目配置，对于标准 Flutter 项目，通常不需要修改
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+      # 指定 Flutter 版本，确保构建环境一致性
+      flutter: 'stable' 
+      # 指定 Xcode 版本
+      xcode: 'latest'
+      # 指定 Cocoapods 版本
+      cocoapods: 'default'
+
+    # 构建脚本，按顺序执行
+    scripts:
+      - name: Initialize Keychain
+        script: |
+          keychain initialize
+
+      - name: Fetch signing files from App Store Connect
+        script: |
+          # Codemagic 的魔法命令，自动通过 API 从 Apple Developer 后台获取证书和描述文件
+          # --type MAC_OS 指定了平台
+          # --create 选项会在找不到时尝试自动创建
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type MAC_OS --create
+      
+      - name: Add certificates to Keychain
+        script: |
+          keychain add-certificates
+
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Flutter build for macOS
+        script: |
+          # 使用 --release 模式构建
+          # 你也可以在这里通过 --build-name 和 --build-number 传入版本号
+          flutter build macos --release
+          
+    # 定义构建产物
+    artifacts:
+      # 将构建生成的 .app 文件打包为可供下载的产物
+      - build/macos/Build/Products/Release/*.app
+      # Codemagic 会自动将产物压缩成 .zip 文件
+    
+    # 发布配置 (可选)
+    publishing:
+      # 如果你想自动上传到 App Store Connect 进行测试或发布
+      app_store_connect:
+        # 这些变量引用了上面 environment.groups 中定义的密钥
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        
+        # 将 .app 文件打包成 .pkg 再上传
+        # 这是 App Store Connect 对 macOS 应用的要求
+        submit_to_app_store: true
